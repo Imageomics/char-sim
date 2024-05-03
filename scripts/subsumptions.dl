@@ -1,0 +1,14 @@
+#define RDFS_SUBCLASS_OF "<http://www.w3.org/2000/01/rdf-schema#subClassOf>"
+
+.decl tbox(s: symbol, p: symbol, o: symbol)
+.decl asssertedSubClassOf(sub: symbol, super: symbol)
+.decl subClassOf(sub: symbol, super: symbol)
+
+asssertedSubClassOf(s, o) :- tbox(s, RDFS_SUBCLASS_OF, o), match("<.*>", s), match("<.*>", o).
+subClassOf(s, o) :- asssertedSubClassOf(s, o).
+subClassOf(x, z) :- asssertedSubClassOf(x, y), subClassOf(y, z).
+subClassOf(s, s) :- asssertedSubClassOf(s, _).
+subClassOf(o, o) :- asssertedSubClassOf(_, o).
+
+.input tbox(filename="phenoscape-kb-tbox-classified.facts")
+.output subClassOf(filename="subsumptions.tsv")
