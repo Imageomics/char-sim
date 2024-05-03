@@ -1,6 +1,24 @@
-rule convert_ofn_to_ttl:
+data_repo = "https://huggingface.co/datasets/imageomics/phenoscape-character-eqs/resolve/main"
+
+rule retrieve_annotations_file:
+    output:
+        "phenex-data-merged.ofn.gz"
+    container:
+        "docker://obolibrary/odkfull:v1.5"
+    shell:
+        "curl -L -O {data_repo}/{output}"
+
+rule retrieve_tbox_file:
+    output:
+        "phenoscape-kb-tbox-classified.ttl.gz"
+    container:
+        "docker://obolibrary/odkfull:v1.5"
+    shell:
+        "curl -L -O {data_repo}/{output}"
+
+rule convert_ofn_gz_to_ttl:
     input:
-        "{ontology}.ofn"
+        "{ontology}.ofn.gz"
     output:
         "{ontology}.ttl"
     container:
@@ -30,9 +48,9 @@ rule extract_annotations:
     shell:
         "arq --data phenex-data-merged.ttl --query sparql/descriptions-to-ontology.rq --results tsv | tail -n +2 >{output}"
 
-rule convert_ttl_to_souffle_tsv:
+rule convert_ttl_gz_to_souffle_tsv:
     input:
-        "{rdf}.ttl"
+        "{rdf}.ttl.gz"
     output:
         "{rdf}.facts"
     container:
