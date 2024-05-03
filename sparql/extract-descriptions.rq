@@ -1,0 +1,11 @@
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX dc: <http://purl.org/dc/elements/1.1/>
+PREFIX obo: <http://purl.obolibrary.org/obo/>
+PREFIX ps: <http://purl.org/phenoscape/vocab.owl#>
+SELECT DISTINCT (STR(?iri) AS ?id) (STR(?desc) AS ?description)
+WHERE {
+  ?iri rdf:type obo:CDAO_0000045 .
+  ?iri dc:description ?desc .
+  ?iri ps:describes_phenotype ?annotation .
+}
