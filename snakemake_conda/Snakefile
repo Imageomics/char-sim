@@ -1,0 +1,7 @@
+rule run_python_script:
+    output:
+        "output_file.txt"
+    conda:
+        "env.yaml"
+    script:
+        "scripts/sample_script.py"
