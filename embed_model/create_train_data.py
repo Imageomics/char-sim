@@ -3,7 +3,7 @@ warnings.filterwarnings('ignore')
 
 import pandas as pd
 
-pheno_desc = pd.read_csv('/extracted-descriptions.tsv', sep='\t')
+pheno_desc = pd.read_csv('extracted-descriptions.tsv', sep='\t')
 print("descriptions loaded!")
 
 idStr = pheno_desc['?id'].values
@@ -15,7 +15,7 @@ pheno_desc.insert(loc = 0, column = 'id_1', value = idStr)
 
 pheno_desc.columns = ['id_1', 'id_2', 'trait_desc']
 
-df1 = pd.read_csv('/pairwise-sim.tsv.gz', compression='gzip', header=None, sep='\t')
+df1 = pd.read_csv('pairwise-sim.tsv.gz', compression='gzip', header=None, sep='\t')
 print("pairwise ids and scores loaded!")
 
 df1.columns = ['id_1', 'id_2', 'maxIC', 'jaccard', 'simGIC']
@@ -36,6 +36,6 @@ id_1_df.columns = ['id_1', 'id_2_x', 'simGIC_1', 'id_2_y', 'desc_1']
 id12_desc12_simGIC = pd.concat([id_1_df[['id_1', 'desc_1', 'simGIC_1']], 
                                 merged_df_2[['id_2', 'desc_2']]], axis = 1)
 
-id12_desc12_simGIC.to_csv("/id12_desc12_simGIC.tsv.gz", compression='gzip', sep='\t')
+id12_desc12_simGIC.to_csv("id12_desc12_simGIC.tsv.gz", compression='gzip', sep='\t')
 
 print("combined data saved")

@@ -68,7 +68,7 @@ model = SentenceTransformer(modules=[word_embedding_model, pooling_model, dense_
 print(nm, ": Pretrained model loaded with custom sequence and embedding lengths")
 
 # 2. Load the Full KB-dataset and transform to STSB format
-df_ip = pd.read_csv(data_dir + 'id12_desc12_simGIC.tsv.gz', compression='gzip', sep="\t")
+df_ip = pd.read_csv(data_dir + 'id12_desc12_simGIC_charsim_filtset.tsv.gz', compression='gzip', sep="\t")
 #df_ip = pd.read_pickle(data_dir +'id12_desc12_simGIC_filt.pkl', compression='infer')
 print("IP file read")
 
