@@ -79,3 +79,14 @@ rule compute_pairwise_similarity:
         "docker://virtuslab/scala-cli:1.3.0"
     shell:
         "scala-cli run --server=false --java-opt -Xmx48G scripts/sim.sc -- {input} {output}"
+
+rule create_train_data:
+    input:
+        "pairwise-sim.tsv.gz",
+        "extracted-descriptions.tsv"
+    output:
+        "id12_desc12_simGIC.tsv.gz"
+    conda:
+        "environment.yaml"
+    script:
+        "embed_model/create_train_data.py"

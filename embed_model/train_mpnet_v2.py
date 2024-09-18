@@ -12,9 +12,6 @@ from datetime import datetime
 
 from datasets import Dataset
 
-#import os
-#os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "max_split_size_mb:256"
-
 import torch
 from torch import nn
 from sentence_transformers import SentenceTransformer, LoggingHandler, losses, models, util
@@ -34,19 +31,19 @@ torch.cuda.empty_cache()
 logging.basicConfig(format="%(asctime)s - %(message)s", datefmt="%Y-%m-%d %H:%M:%S", level=logging.INFO)
 
 nm = 'all-mpnet-base-v2'
-model_dir = "/projects/imageomics/skar/ht_filtered/model_filt/"
-data_dir = "/projects/imageomics/skar/ht_filtered/data/"
+model_dir = "/projects/imageomics/skar/ht_10p/model_10p/"
+data_dir = "/projects/imageomics/skar/ht_10p/data/"
 output_dir = (model_dir + nm + "-" + datetime.now().strftime("%Y-%m-%d_%H-%M-%S"))
 
 
-# Specify any Hugging Face pre-trained model here, e.g., bert-base-uncased, roberta-base, xlm-roberta-base
-# nm = 'all-mpnet-base-v2'
+# Specify any pre-trained Sentence Transformer model here, e.g., bert-base-uncased, roberta-base, xlm-roberta-base
 model_name = 'sentence-transformers/'+ nm
 
 # 1. Define the SentenceTransformer model.
 output_dimension = 256
 max_seq_length = 256
 train_batch_size = 64
+eval_batch_size = 128
 num_epochs = 2
 
 
@@ -68,7 +65,7 @@ model = SentenceTransformer(modules=[word_embedding_model, pooling_model, dense_
 print(nm, ": Pretrained model loaded with custom sequence and embedding lengths")
 
 # 2. Load the Full KB-dataset and transform to STSB format
-df_ip = pd.read_csv(data_dir + 'id12_desc12_simGIC_charsim_filtset.tsv.gz', compression='gzip', sep="\t")
+df_ip = pd.read_csv(data_dir + 'id12_desc12_simGIC.tsv.gz', compression='gzip', sep="\t")
 #df_ip = pd.read_pickle(data_dir +'id12_desc12_simGIC_filt.pkl', compression='infer')
 print("IP file read")
 
@@ -77,26 +74,17 @@ df = df_ip[['desc_1', 'desc_2', 'simGIC_1']]
 df.columns = ['sentence1', 'sentence2', 'score']
 df['score'] = df['score']/100.0 # normalize similarity score values (per the max SimGIC value)
 
-def sample_prows(data, perc):
-    return data.head(int(data.shape[0]*perc))
-
-ip_subset = sample_prows(df, perc = 1.0)
-
 def sample_split(df, perc, tst_split):
-    # Generate indices for sampling
-    num_samples = int(df.shape[0] * perc)
-    trn_ids = np.random.randint(0, df.shape[0], size=num_samples)
+    # Shuffle and split the DataFrame
+    df_trn = df.sample(frac=perc, random_state=42)
+    remaining_df = df.drop(df_trn.index)
 
-    # Sample the array using generated indices
-    df_trn = df[df.index.isin(trn_ids)]
-    df_dev_tst = df[~df.index.isin(trn_ids)]
-
-    df_dev = df_dev_tst.head(int(df_dev_tst.shape[0] * tst_split))
-    df_tst = df_dev_tst.tail(int(df_dev_tst.shape[0] * tst_split))
+    df_dev = remaining_df.sample(frac=tst_split, random_state=42)
+    df_tst = remaining_df.drop(df_dev.index).sample(frac=1, random_state=42)
 
     return df_trn, df_dev, df_tst
 
-train, val, test = sample_split(df = ip_subset, perc = 0.7, tst_split = 0.5)
+train, val, test = sample_split(df=df, perc=0.7, tst_split=0.5)
 
 
 print("Train set created: ", train.shape)
@@ -126,6 +114,8 @@ print("Data partitions transformed to STSB format")
 
 
 train_loss = losses.CosineSimilarityLoss(model=model)
+# train_loss = losses.CoSENTLoss(model=model)
+# train_loss_angle = losses.AnglELoss(model=model)
 
 # 4. Define an evaluator for use during training. This is useful to keep track of alongside the evaluation loss.
 dev_evaluator = EmbeddingSimilarityEvaluator(
@@ -146,18 +136,19 @@ args = SentenceTransformerTrainingArguments(
     num_train_epochs=num_epochs,
     per_device_train_batch_size=train_batch_size,
     per_device_eval_batch_size=train_batch_size,
+    auto_find_batch_size = True,
     learning_rate = 2e-05,
-    warmup_ratio=0.000001,
-    #warmup_steps=5000,
+    #warmup_ratio=0.000001,
+    warmup_steps=500,
     fp16=False,  # Set to False if you get an error that your GPU can't run on FP16
     bf16=False,  # Set to True if you have a GPU that supports BF16
     # Optional tracking/debugging parameters:
     eval_strategy="steps",
-    eval_steps=10000,
+    eval_steps=50000,
     save_strategy="steps",
-    save_steps=10000,
+    save_steps=50000,
     save_total_limit=5,
-    logging_steps=10000,
+    logging_steps=50000,
 )
 
 # 6. Create an evaluator & evaluate the base model
@@ -189,3 +180,4 @@ print("Finetuned model tested")
 # 8. Save the trained & evaluated model locally
 final_output_dir = f"{output_dir}/final"
 model.save(final_output_dir)
+
