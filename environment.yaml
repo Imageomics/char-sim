@@ -1,0 +1,11 @@
+name: snakemake_env
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - snakemake
+  - pandas
+  - numpy
+  - pip
+  - pip:
+      - sentence-transformers
