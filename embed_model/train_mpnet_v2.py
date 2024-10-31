@@ -30,11 +30,21 @@ torch.cuda.empty_cache()
 # Set the log level to INFO to get more information
 logging.basicConfig(format="%(asctime)s - %(message)s", datefmt="%Y-%m-%d %H:%M:%S", level=logging.INFO)
 
-nm = 'all-mpnet-base-v2'
-model_dir = "/projects/imageomics/skar/ht_10p/model_10p/"
-data_dir = "/projects/imageomics/skar/ht_10p/data/"
-output_dir = (model_dir + nm + "-" + datetime.now().strftime("%Y-%m-%d_%H-%M-%S"))
+def create_directory(directory_path):
+    if not os.path.exists(directory_path):
+        os.makedirs(directory_path)
+        print(f"Directory '{directory_path}' created.")
+    else:
+        print(f"Directory '{directory_path}' already exists.")
 
+nm = 'all-mpnet-base-v2'
+model_dir = "/projects/imageomics/skar/model_10p/"
+create_directory(model_dir)
+
+data_dir = "/projects/imageomics/skar/data/"
+create_directory(data_dir)
+
+output_dir = (model_dir + nm + "-" + datetime.now().strftime("%Y-%m-%d_%H-%M-%S"))
 
 # Specify any pre-trained Sentence Transformer model here, e.g., bert-base-uncased, roberta-base, xlm-roberta-base
 model_name = 'sentence-transformers/'+ nm
