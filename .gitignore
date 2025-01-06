@@ -3,3 +3,4 @@
 .scala-build
 .snakemake
 .vscode
+.DS_Store
