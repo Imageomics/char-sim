@@ -29,6 +29,7 @@ rule convert_ofn_gz_to_ttl:
 rule extract_descriptions:
     input:
         "phenex-data-merged.ttl",
+        "phenoscape-kb-tbox-classified.ttl.gz",
         "sparql/extract-descriptions.rq"
     output:
         "extracted-descriptions.tsv"
@@ -40,6 +41,7 @@ rule extract_descriptions:
 rule extract_annotations:
     input:
         "phenex-data-merged.ttl",
+        "phenoscape-kb-tbox-classified.ttl.gz",
         "sparql/descriptions-to-ontology.rq"
     output:
         "annotations.tsv"
