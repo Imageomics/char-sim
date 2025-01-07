@@ -35,7 +35,7 @@ rule extract_descriptions:
     container:
         "docker://stain/jena:4.8.0"
     shell:
-        "arq --data phenex-data-merged.ttl --results tsv --query sparql/extract-descriptions.rq | sed -E 's/^\"//' | sed -E 's/\"\\t\"/\\t/' | sed -E 's/\"$//' | sed -E 's/\\\\\"/\"/g' >{output}"
+        "arq --data phenex-data-merged.ttl --data phenoscape-kb-tbox-classified.ttl.gz --query sparql/extract-descriptions.rq --results tsv | sed -E 's/^\"//' | sed -E 's/\"\\t\"/\\t/g' | sed -E 's/\"$//' | sed -E 's/\\\\\"/\"/g' | tail -n +2 >{output}"
 
 rule extract_annotations:
     input:
@@ -46,7 +46,7 @@ rule extract_annotations:
     container:
         "docker://stain/jena:4.8.0"
     shell:
-        "arq --data phenex-data-merged.ttl --query sparql/descriptions-to-ontology.rq --results tsv | tail -n +2 >{output}"
+        "arq --data phenex-data-merged.ttl --data phenoscape-kb-tbox-classified.ttl.gz --query sparql/descriptions-to-ontology.rq --results tsv | sed -E 's/^\"//' | sed -E 's/\"\\t\"/\\t/g' | sed -E 's/\"$//' | sed -E 's/\\\\\"/\"/g' | tail -n +2 >{output}"
 
 rule convert_ttl_gz_to_souffle_tsv:
     input:
