@@ -61,7 +61,7 @@ rule convert_ttl_gz_to_souffle_tsv:
     container:
         "docker://stain/jena:5.1.0"
     shell:
-        "riot -q --nocheck --output ntriples {input} | sed 's/ /\\t/' | sed 's/ /\\t/' | sed 's/ \.$//' >{output}"
+        "{ riot -q --nocheck --output ntriples {input} || true; } | sed 's/ /\\t/' | sed 's/ /\\t/' | sed 's/ \\.$//' >{output}"
 
 rule subsumptions_closure:
     input:
