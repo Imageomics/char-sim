@@ -4,7 +4,7 @@ PREFIX dc: <http://purl.org/dc/elements/1.1/>
 PREFIX oio: <http://www.geneontology.org/formats/oboInOwl#>
 PREFIX obo: <http://purl.obolibrary.org/obo/>
 PREFIX ps: <http://purl.org/phenoscape/vocab.owl#>
-SELECT DISTINCT (STR(?character) AS ?character_id) (STR(?state) AS ?state_id) (STR(?desc) AS ?description)
+SELECT DISTINCT ?character ?state ?annotation
 WHERE {
   ?state rdf:type obo:CDAO_0000045 .
   ?state dc:description ?desc .

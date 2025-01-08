@@ -19,7 +19,7 @@ val annotations = Using.resource(Source.fromFile(annotationsPath, "utf-8"))(
   _.getLines()
     .map { line =>
       val items = line.split("\t", -1)
-      items(0) -> items(1)
+      items(1) -> items(2)
     }
     .toList
     .groupMap(_._1)(_._2)

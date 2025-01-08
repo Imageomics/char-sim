@@ -1,3 +1,6 @@
+# mamba create -c conda-forge -c bioconda -n snakemake snakemake
+# mamba activate snakemake
+
 data_repo = "https://huggingface.co/datasets/imageomics/phenoscape-character-eqs/resolve/main"
 
 rule retrieve_annotations_file:
@@ -34,7 +37,7 @@ rule extract_descriptions:
     output:
         "extracted-descriptions.tsv"
     container:
-        "docker://stain/jena:4.8.0"
+        "docker://stain/jena:5.1.0"
     shell:
         "arq --data phenex-data-merged.ttl --data phenoscape-kb-tbox-classified.ttl.gz --query sparql/extract-descriptions.rq --results tsv | sed -E 's/^\"//' | sed -E 's/\"\\t\"/\\t/g' | sed -E 's/\"$//' | sed -E 's/\\\\\"/\"/g' | tail -n +2 >{output}"
 
@@ -46,7 +49,7 @@ rule extract_annotations:
     output:
         "annotations.tsv"
     container:
-        "docker://stain/jena:4.8.0"
+        "docker://stain/jena:5.1.0"
     shell:
         "arq --data phenex-data-merged.ttl --data phenoscape-kb-tbox-classified.ttl.gz --query sparql/descriptions-to-ontology.rq --results tsv | sed -E 's/^\"//' | sed -E 's/\"\\t\"/\\t/g' | sed -E 's/\"$//' | sed -E 's/\\\\\"/\"/g' | tail -n +2 >{output}"
 
@@ -56,9 +59,9 @@ rule convert_ttl_gz_to_souffle_tsv:
     output:
         "{rdf}.facts"
     container:
-        "docker://stain/jena:4.8.0"
+        "docker://stain/jena:5.1.0"
     shell:
-        "riot -q --nocheck --output ntriples {input} | sed 's/ /\\t/' | sed 's/ /\\t/' | sed 's/ \.$//' >{output}"
+        "{{ riot -q --nocheck --output ntriples {input} || true; }} | sed 's/ /\\t/' | sed 's/ /\\t/' | sed 's/ \\.$//' >{output}"
 
 rule subsumptions_closure:
     input:
