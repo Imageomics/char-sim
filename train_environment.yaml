@@ -6,3 +6,4 @@ dependencies:
   - numpy
   - pandas
   - sentence-transformers
+  - accelerate>=0.26.0
