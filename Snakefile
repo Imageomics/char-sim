@@ -105,8 +105,8 @@ rule train_model:
         data="data_{percentage}p_TRAINING.tsv.gz",
         script="embed_model/train_mpnet_v2.py"
     output:
-        model_dir="model-{wildcards.percentage}p",
-        output_dir="output-{wildcards.percentage}p"
+        model_dir="model-{percentage}p",
+        output_dir="output-{percentage}p"
     conda:
         "environment.yaml"
     shell:
