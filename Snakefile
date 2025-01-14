@@ -108,6 +108,6 @@ rule train_model:
         model_dir="model-{percentage}p",
         output_dir="output-{percentage}p"
     conda:
-        "environment.yaml"
+        "train_environment.yaml"
     shell:
         "mkdir {output.model_dir}; mkdir {output.output_dir}; python {input.script} {output.model_dir} {input.data} {output.output_dir}"
