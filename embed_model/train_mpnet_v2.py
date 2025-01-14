@@ -23,6 +23,10 @@ from sentence_transformers.similarity_functions import SimilarityFunction
 from sentence_transformers.trainer import SentenceTransformerTrainer
 from sentence_transformers.training_args import SentenceTransformerTrainingArguments
 
+model_dir = sys.argv[1]
+data_file = sys.argv[2] #gzip-compressed TSV
+output_dir = sys.argv[3]
+
 torch.cuda.empty_cache()
 #torch.cuda.set_device(args.local_rank)
 #device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -34,9 +38,9 @@ torch.cuda.empty_cache()
 logging.basicConfig(format="%(asctime)s - %(message)s", datefmt="%Y-%m-%d %H:%M:%S", level=logging.INFO)
 
 nm = 'all-mpnet-base-v2'
-model_dir = "/projects/imageomics/skar/ht_filtered/model_filt/"
-data_dir = "/projects/imageomics/skar/ht_filtered/data/"
-output_dir = (model_dir + nm + "-" + datetime.now().strftime("%Y-%m-%d_%H-%M-%S"))
+#model_dir = "/projects/imageomics/skar/ht_filtered/model_filt/"
+#data_dir = "/projects/imageomics/skar/ht_filtered/data/"
+#output_dir = (model_dir + nm + "-" + datetime.now().strftime("%Y-%m-%d_%H-%M-%S"))
 
 
 # Specify any Hugging Face pre-trained model here, e.g., bert-base-uncased, roberta-base, xlm-roberta-base
@@ -68,12 +72,11 @@ model = SentenceTransformer(modules=[word_embedding_model, pooling_model, dense_
 print(nm, ": Pretrained model loaded with custom sequence and embedding lengths")
 
 # 2. Load the Full KB-dataset and transform to STSB format
-df_ip = pd.read_csv(data_dir + 'id12_desc12_simGIC_charsim_filtset.tsv.gz', compression='gzip', sep="\t")
-#df_ip = pd.read_pickle(data_dir +'id12_desc12_simGIC_filt.pkl', compression='infer')
+df_ip = pd.read_csv(data_file, compression='gzip', sep="\t")
 print("IP file read")
 
 # create data partitions
-df = df_ip[['desc_1', 'desc_2', 'simGIC_1']]
+df = df_ip[['desc_1', 'desc_2', 'simGIC']]
 df.columns = ['sentence1', 'sentence2', 'score']
 df['score'] = df['score']/100.0 # normalize similarity score values (per the max SimGIC value)
 

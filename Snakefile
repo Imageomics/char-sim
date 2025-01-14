@@ -99,3 +99,15 @@ rule create_train_data:
         "environment.yaml"
     shell:
         "python embed_model/create_train_data.py extracted-descriptions.tsv pairwise-sim.tsv.gz {wildcards.percentage} data_{wildcards.percentage}p_TRAINING.tsv.gz data_{wildcards.percentage}p_ALL_NON_TRAIN.tsv.gz data_{wildcards.percentage}p_NON_OVERLAP.tsv.gz"
+
+rule train_model:
+    input:
+        data="data_{percentage}p_TRAINING.tsv.gz",
+        script="embed_model/train_mpnet_v2.py"
+    output:
+        model_dir="model-{wildcards.percentage}p",
+        output_dir="output-{wildcards.percentage}p"
+    conda:
+        "environment.yaml"
+    shell:
+        "mkdir {output.model_dir}; mkdir {output.output_dir}; python {input.script} {output.model_dir} {input.data} {output.output_dir}"
