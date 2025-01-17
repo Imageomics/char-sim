@@ -23,9 +23,8 @@ from sentence_transformers.similarity_functions import SimilarityFunction
 from sentence_transformers.trainer import SentenceTransformerTrainer
 from sentence_transformers.training_args import SentenceTransformerTrainingArguments
 
-model_dir = sys.argv[1]
-data_file = sys.argv[2] #gzip-compressed TSV
-output_dir = sys.argv[3]
+data_file = sys.argv[1] #gzip-compressed TSV
+output_dir = sys.argv[2]
 
 torch.cuda.empty_cache()
 #torch.cuda.set_device(args.local_rank)
