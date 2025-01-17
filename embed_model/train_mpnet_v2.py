@@ -73,34 +73,37 @@ print(nm, ": Pretrained model loaded with custom sequence and embedding lengths"
 
 # 2. Load the Full KB-dataset and transform to STSB format
 df_ip = pd.read_csv(data_file, compression='gzip', sep="\t")
+df_ip['simGIC'] = df_ip['simGIC']/100.0 # normalize similarity score values (per the max SimGIC value)
 print("IP file read")
 
-# create data partitions
-df = df_ip[['desc_1', 'desc_2', 'simGIC']]
-df.columns = ['sentence1', 'sentence2', 'score']
-df['score'] = df['score']/100.0 # normalize similarity score values (per the max SimGIC value)
+# Get unique character IDs
+ch1_ids = df_ip['character_1'].unique()
+ch2_ids = df_ip['character_2'].unique()
+ch_ids = np.union1d(ch1_ids, ch2_ids)
+num_ch_ids = len(ch_ids)
+print(f"There are {num_ch_ids} unique character ids")
 
-def sample_prows(data, perc):
-    return data.head(int(data.shape[0]*perc))
+num_train_characters = int(len(ch_ids) * 0.5) # this fraction makes the final percentage of comparisons close to 0.7
 
-ip_subset = sample_prows(df, perc = 1.0)
+# Randomly select the training and test character IDs
+train_character_ids = np.random.choice(ch_ids, num_train_characters, replace=False)
+dev_tst_character_ids = np.setdiff1d(ch_ids, train_character_ids)
+np.random.shuffle(dev_tst_character_ids)
+# Split into two equal sets
+mid_point = len(dev_tst_character_ids) // 2
+dev_character_ids = dev_tst_character_ids[:mid_point]
+tst_character_ids = dev_tst_character_ids[mid_point:]
 
-def sample_split(df, perc, tst_split):
-    # Generate indices for sampling
-    num_samples = int(df.shape[0] * perc)
-    trn_ids = np.random.randint(0, df.shape[0], size=num_samples)
+train_df = df_ip[df_ip['character_1'].isin(train_character_ids) & df_ip['character_2'].isin(train_character_ids)]
+val_df = df_ip[df_ip['character_1'].isin(dev_character_ids) & df_ip['character_2'].isin(dev_character_ids)]
+tst_df = df_ip[df_ip['character_1'].isin(tst_character_ids) & df_ip['character_2'].isin(tst_character_ids)]
 
-    # Sample the array using generated indices
-    df_trn = df[df.index.isin(trn_ids)]
-    df_dev_tst = df[~df.index.isin(trn_ids)]
-
-    df_dev = df_dev_tst.head(int(df_dev_tst.shape[0] * tst_split))
-    df_tst = df_dev_tst.tail(int(df_dev_tst.shape[0] * tst_split))
-
-    return df_trn, df_dev, df_tst
-
-train, val, test = sample_split(df = ip_subset, perc = 0.7, tst_split = 0.5)
-
+train = train_df[['desc_1', 'desc_2', 'simGIC']]
+train.columns = ['sentence1', 'sentence2', 'score']
+val = val_df[['desc_1', 'desc_2', 'simGIC']]
+val.columns = ['sentence1', 'sentence2', 'score']
+test = tst_df[['desc_1', 'desc_2', 'simGIC']]
+test.columns = ['sentence1', 'sentence2', 'score']
 
 print("Train set created: ", train.shape)
 print("Eval set created: ", val.shape)
