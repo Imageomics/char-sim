@@ -131,7 +131,8 @@ ds_test = Dataset.from_pandas(test)
 print("Data partitions transformed to STSB format")
 
 
-train_loss = losses.CosineSimilarityLoss(model=model)
+#train_loss = losses.CosineSimilarityLoss(model=model)
+train_loss = losses.CoSENTLoss(model)
 
 # 4. Define an evaluator for use during training. This is useful to keep track of alongside the evaluation loss.
 dev_evaluator = EmbeddingSimilarityEvaluator(
