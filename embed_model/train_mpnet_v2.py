@@ -50,7 +50,7 @@ model_name = 'sentence-transformers/'+ nm
 output_dimension = 256
 max_seq_length = 256
 train_batch_size = 64
-num_epochs = 2
+num_epochs = 10
 
 
 word_embedding_model = models.Transformer(model_name,
@@ -159,11 +159,11 @@ args = SentenceTransformerTrainingArguments(
     bf16=False,  # Set to True if you have a GPU that supports BF16
     # Optional tracking/debugging parameters:
     eval_strategy="steps",
-    eval_steps=10000,
+    eval_steps=2000,
     save_strategy="steps",
     save_steps=10000,
     save_total_limit=5,
-    logging_steps=10000,
+    logging_steps=500,
 )
 
 # 6. Create an evaluator & evaluate the base model
