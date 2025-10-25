@@ -92,9 +92,9 @@ rule create_train_data:
         "pairwise-sim.tsv.gz",
         "embed_model/create_train_data.py"
     output:
-        "data_{percentage}p_TRAINING.tsv.gz",
-        "data_{percentage}p_ALL_NON_TRAIN.tsv.gz",
-        "data_{percentage}p_NON_OVERLAP.tsv.gz"
+        "data/data_{percentage}p_TRAINING.tsv.gz",
+        "data/data_{percentage}p_ALL_NON_TRAIN.tsv.gz",
+        "data/data_{percentage}p_NON_OVERLAP.tsv.gz"
     conda:
         "environment.yaml"
     shell:
@@ -102,11 +102,13 @@ rule create_train_data:
 
 rule train_model:
     input:
-        data="data_{percentage}p_TRAINING.tsv.gz",
-        script="embed_model/train_mpnet_v2.py"
+        data="data/data_{percentage}p_TRAINING.tsv.gz",
+        script="train_model.py"
+        exp_name="baseline"
+        base_path = "."
     output:
-        output_dir=directory("output-{percentage}p")
+        output_dir=directory("outputs")
     conda:
         "train_environment.yaml"
     shell:
-        "mkdir {output.output_dir}; python {input.script} {input.data} {output.output_dir}"
+        "mkdir {output.output_dir}; python {input.script} {input.data} {input.base_path} {input.exp_name} {output.output_dir}"
