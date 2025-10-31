@@ -34,25 +34,25 @@ rule extract_descriptions:
     input:
         "phenex-data-merged.ttl",
         "phenoscape-kb-tbox-classified.ttl.gz",
-        "sparql/extract-descriptions.rq"
+        "sparql/{dataset}-extract-descriptions.rq"
     output:
-        "extracted-descriptions.tsv"
+        "{dataset}-extracted-descriptions.tsv"
     container:
         "docker://stain/jena:5.1.0"
     shell:
-        "arq --data phenex-data-merged.ttl --data phenoscape-kb-tbox-classified.ttl.gz --query sparql/extract-descriptions.rq --results tsv | sed -E 's/^\"//' | sed -E 's/\\t\"/\\t/g' | sed -E 's/\"$//' | sed -E 's/\\\\\"/\"/g' | tail -n +2 >{output}"
+        "arq --data phenex-data-merged.ttl --data phenoscape-kb-tbox-classified.ttl.gz --query sparql/{wildcards.dataset}-extract-descriptions.rq --results tsv | sed -E 's/^\"//' | sed -E 's/\\t\"/\\t/g' | sed -E 's/\"$//' | sed -E 's/\\\\\"/\"/g' | tail -n +2 >{output}"
 
 rule extract_annotations:
     input:
         "phenex-data-merged.ttl",
         "phenoscape-kb-tbox-classified.ttl.gz",
-        "sparql/descriptions-to-ontology.rq"
+        "sparql/{dataset}-descriptions-to-ontology.rq"
     output:
-        "annotations.tsv"
+        "{dataset}-annotations.tsv"
     container:
         "docker://stain/jena:5.1.0"
     shell:
-        "arq --data phenex-data-merged.ttl --data phenoscape-kb-tbox-classified.ttl.gz --query sparql/descriptions-to-ontology.rq --results tsv | sed -E 's/^\"//' | sed -E 's/\"\\t\"/\\t/g' | sed -E 's/\"$//' | sed -E 's/\\\\\"/\"/g' | tail -n +2 >{output}"
+        "arq --data phenex-data-merged.ttl --data phenoscape-kb-tbox-classified.ttl.gz --query sparql/{wildcards.dataset}-descriptions-to-ontology.rq --results tsv | sed -E 's/^\"//' | sed -E 's/\"\\t\"/\\t/g' | sed -E 's/\"$//' | sed -E 's/\\\\\"/\"/g' | tail -n +2 >{output}"
 
 rule convert_ttl_gz_to_souffle_tsv:
     input:
@@ -77,10 +77,10 @@ rule subsumptions_closure:
 
 rule compute_pairwise_similarity:
     input:
-        "annotations.tsv",
+        "{dataset}-annotations.tsv",
         "subsumptions.tsv"
     output:
-        "pairwise-sim.tsv.gz"
+        "{dataset}-pairwise-sim.tsv.gz"
     container:
         "docker://virtuslab/scala-cli:1.3.0"
     shell:
@@ -88,27 +88,25 @@ rule compute_pairwise_similarity:
 
 rule create_train_data:
     input:
-        "extracted-descriptions.tsv",
-        "pairwise-sim.tsv.gz",
+        "{dataset}-extracted-descriptions.tsv",
+        "{dataset}-pairwise-sim.tsv.gz",
         "embed_model/create_train_data.py"
     output:
-        "data/data_{percentage}p_TRAINING.tsv.gz",
-        "data/data_{percentage}p_ALL_NON_TRAIN.tsv.gz",
-        "data/data_{percentage}p_NON_OVERLAP.tsv.gz"
+        "data/{dataset}/data_{percentage}p_TRAINING.tsv.gz",
+        "data/{dataset}/data_{percentage}p_ALL_NON_TRAIN.tsv.gz",
+        "data/{dataset}/data_{percentage}p_NON_OVERLAP.tsv.gz"
     conda:
         "environment.yaml"
     shell:
-        "python embed_model/create_train_data.py extracted-descriptions.tsv pairwise-sim.tsv.gz {wildcards.percentage} data_{wildcards.percentage}p_TRAINING.tsv.gz data_{wildcards.percentage}p_ALL_NON_TRAIN.tsv.gz data_{wildcards.percentage}p_NON_OVERLAP.tsv.gz"
+        "python embed_model/create_train_data.py {wildcards.dataset}-extracted-descriptions.tsv {wildcards.dataset}-pairwise-sim.tsv.gz {wildcards.percentage} data/all/data_{wildcards.percentage}p_TRAINING.tsv.gz data/all/data_{wildcards.percentage}p_ALL_NON_TRAIN.tsv.gz data/all/data_{wildcards.percentage}p_NON_OVERLAP.tsv.gz"
 
 rule train_model:
     input:
-        data="data/data_{percentage}p_TRAINING.tsv.gz",
-        script="train_model.py"
-        exp_name="baseline"
-        base_path = "."
+        data="data/{dataset}/data_{percentage}p_TRAINING.tsv.gz",
     output:
-        output_dir=directory("outputs")
+        output_dir=directory("outputs/{dataset}_{percentage}")
     conda:
         "train_environment.yaml"
     shell:
-        "mkdir {output.output_dir}; python {input.script} {input.data} {input.base_path} {input.exp_name} {output.output_dir}"
+        "mkdir {output.output_dir}; python train_model.py {input.data} {output.output_dir}"
+

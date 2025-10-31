@@ -21,15 +21,13 @@ from sentence_transformers.training_args import SentenceTransformerTrainingArgum
 
 
 @click.command()
-@click.argument('--data_path', help='Training file name.')
-@click.option('--exp_name', default="baseline" help='Name to save experiment results.')
-@click.option('--output_dir', default="./outputs" help='Name to save experiment results.')
+@click.argument('data_path')
+@click.argument('output_dir')
 
-def main(data_path, exp_name, output_dir):
+def main(data_path, output_dir):
     """Main function to estimate a Trait2Vec model.
     """
     #PARAMETERS
-    output_dir = os.path.join(output_dir, exp_name)
     
     output_dimension = 256
     max_seq_length = 256
@@ -79,7 +77,7 @@ def main(data_path, exp_name, output_dir):
             param.requires_grad = False
 
     # 2. Load the Full KB-dataset and transform to STSB format
-    df_ip = pd.read_csv(data_file, compression='gzip', sep="\t")
+    df_ip = pd.read_csv(data_path, compression='gzip', sep="\t")
     df_ip['simGIC'] = df_ip['simGIC']/100.0 # normalize similarity score values (per the max SimGIC value)
     df_ip['simGIC'] = (df_ip['simGIC']*2)-1  # to match cos_similarity range
     print("IP file read")
@@ -173,6 +171,7 @@ def main(data_path, exp_name, output_dir):
             eval_dataset = ds_val.shuffle(seed+i).select(range(n_val_datapoints)),
             compute_metrics = None,
             loss = losses.CoSENTLoss(model),
+            seed=seed+i,
             callbacks=[early_stopper],
         )
         print("Starting training")
@@ -195,8 +194,8 @@ def main(data_path, exp_name, output_dir):
     print(test_history)
 
     # 8. Save the trained & evaluated model locally
-    final_output_dir = f"{output_dir}/model"
+    final_output_dir = os.path.join(output_dir, "model")
     model.save(final_output_dir)
 
-def __name__=="__main__":
+if __name__ == "__main__":
     main()

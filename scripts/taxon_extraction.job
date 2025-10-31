@@ -1,0 +1,11 @@
+#!/bin/bash
+source /home/jjgarcia/.bashrc
+
+module load singularity/3.9.5
+module load cuda
+
+conda activate snakemake
+
+snakemake --unlock
+
+snakemake -c2 --use-singularity --use-conda --rerun-incomplete outputs/all_100
