@@ -1,40 +1,32 @@
 import os
-import warnings
 import logging
-import sys
-import traceback
-import random
 import torch
 import click
 import pandas as pd
 import numpy as np
-from datetime import datetime
-from datasets import Dataset
-from datasets import concatenate_datasets
 from torch import nn
+from datasets import Dataset, load_dataset
 from transformers import EarlyStoppingCallback
-from sentence_transformers import SentenceTransformer, LoggingHandler, losses, models, util
+from sentence_transformers import SentenceTransformer, losses, models
 from sentence_transformers.evaluation import EmbeddingSimilarityEvaluator
-from sentence_transformers.similarity_functions import SimilarityFunction
 from sentence_transformers.trainer import SentenceTransformerTrainer
 from sentence_transformers.training_args import SentenceTransformerTrainingArguments
 
-
 @click.command()
-@click.argument('data_path')
-@click.argument('output_dir')
+@click.option('--data_path', default=None, help='Directory with training data. Used by Snakefile pipeline.')
+@click.option('--output_dir', default='outputs', help='Directory to save experiment results to.')
+@click.option('--dataset', default='full_data', help='char-sim-data dataset to train model with.')
 
-def main(data_path, output_dir):
+def main(data_path, output_dir, dataset):
     """Main function to estimate a Trait2Vec model.
     """
     #PARAMETERS
-    
     output_dimension = 256
     max_seq_length = 256
     frozen = False
     BF16 = False
 
-    seed = 42 
+    seed = 23 
     n_train_datapoints = 50000
     n_val_datapoints = 3000
 
@@ -46,9 +38,15 @@ def main(data_path, output_dir):
     num_epochs = 10
     eval_steps = 100
 
+    np.random.seed(seed) 
+
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"{device} loaded")
     print(f'There are {torch.cuda.device_count()} GPU(s) available.')
+
+    #Ensure output directory exists
+    output_dir = os.path.join(".", output_dir, f"{dataset}")
+    os.makedirs(output_dir, exist_ok=True)
 
     # Set the log level to INFO to get more information
     logging.basicConfig(format="%(asctime)s - %(message)s", datefmt="%Y-%m-%d %H:%M:%S", level=logging.INFO)
@@ -77,7 +75,10 @@ def main(data_path, output_dir):
             param.requires_grad = False
 
     # 2. Load the Full KB-dataset and transform to STSB format
-    df_ip = pd.read_csv(data_path, compression='gzip', sep="\t")
+    if data_path is not None:
+        df_ip = pd.read_csv(data_path, compression='gzip', sep="\t")
+    else:
+        df_ip = load_dataset("imageomics/char-sim-data", dataset, split="train").to_pandas()
     df_ip['simGIC'] = df_ip['simGIC']/100.0 # normalize similarity score values (per the max SimGIC value)
     df_ip['simGIC'] = (df_ip['simGIC']*2)-1  # to match cos_similarity range
     print("IP file read")
@@ -129,11 +130,8 @@ def main(data_path, output_dir):
     test['sentence1'] = test['sentence1'].astype("string")
     test['sentence2'] = test['sentence2'].astype("string")
 
-    # In[122]:
     args = SentenceTransformerTrainingArguments(
-        # Required parameter:
         output_dir=output_dir,
-        # Optional training parameters:
         num_train_epochs=num_epochs,
         per_device_train_batch_size=train_batch_size,
         per_device_eval_batch_size=train_batch_size,
@@ -143,18 +141,19 @@ def main(data_path, output_dir):
         bf16=BF16,  # Set to True if you have a GPU that supports BF16
         # Optional tracking/debugging parameters:
         eval_strategy="steps",
-        eval_steps=eval_steps, #2000
+        eval_steps=eval_steps,
         save_strategy="steps",
         save_steps=eval_steps,
         save_total_limit=2,
         logging_steps=1,
         greater_is_better=False,
         load_best_model_at_end = True,
+        seed=seed
     )
 
     early_stopper = EarlyStoppingCallback(
-        early_stopping_patience=early_stopping_patience, # you can change this value if needed
-        early_stopping_threshold=0.01 # you can change this value if needed
+        early_stopping_patience=early_stopping_patience,
+        early_stopping_threshold=0.01 
     )
 
     ds_test = Dataset.from_pandas(test)
@@ -171,8 +170,7 @@ def main(data_path, output_dir):
             eval_dataset = ds_val.shuffle(seed+i).select(range(n_val_datapoints)),
             compute_metrics = None,
             loss = losses.CoSENTLoss(model),
-            seed=seed+i,
-            callbacks=[early_stopper],
+            callbacks=[early_stopper]
         )
         print("Starting training")
         trainer.train()
@@ -180,11 +178,11 @@ def main(data_path, output_dir):
         del trainer
 
     print("Test Evaluator Started...")
-    # 7. Evaluate the model performance on the Phenoscape test dataset
+    # 7. Evaluate the model performance on the test dataset
     test_evaluator = EmbeddingSimilarityEvaluator(
-        sentences1=ds_test["sentence1"], #test["sentence1"]
-        sentences2=ds_test["sentence2"], #test["sentence2"]
-        scores=ds_test["score"], #test["score"]
+        sentences1=ds_test["sentence1"], 
+        sentences2=ds_test["sentence2"],
+        scores=ds_test["score"], 
         show_progress_bar = True,
         write_csv=True,
         name="pheno-test",
@@ -194,8 +192,7 @@ def main(data_path, output_dir):
     print(test_history)
 
     # 8. Save the trained & evaluated model locally
-    final_output_dir = os.path.join(output_dir, "model")
-    model.save(final_output_dir)
+    model.save(os.path.join(output_dir, "model"))
 
 if __name__ == "__main__":
     main()
