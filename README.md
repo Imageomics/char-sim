@@ -25,7 +25,7 @@ python train_model.py
 ```
 The above will estimate a Trait2Vec model and save it to `outputs/full_data/model` directory. We also provide a pre-trained model in huggingface [Trait2Vec](https://huggingface.co/imageomics/trait2vec). 
 
-To train a taxon-specific Trait2Vec model change the dataset parameter. The next line will estimate a Trait2Vec model and save it to `outputs/characiformes/model` directory
+To train a taxon-specific Trait2Vec model change the dataset parameter. The next line will estimate a Trait2Vec model, with the `characiformes` dataset, and save it to `outputs/characiformes/model` directory
 ```
 python train_model.py --dataset characiformes
 ```

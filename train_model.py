@@ -27,19 +27,18 @@ def main(data_path, output_dir, dataset):
     BF16 = False
 
     seed = 23 
-    n_train_datapoints = 50000
+    n_train_datapoints = 50000 
     n_val_datapoints = 3000
 
     learning_rate = 3.088725904602452e-05
     warmup_ratio = 0.018257384689084222
     early_stopping_patience = 5
     num_train_iters = 20
-    train_batch_size = 100 #64
+    train_batch_size = 64 
     num_epochs = 10
     eval_steps = 100
 
     np.random.seed(seed) 
-
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"{device} loaded")
     print(f'There are {torch.cuda.device_count()} GPU(s) available.')
@@ -78,6 +77,7 @@ def main(data_path, output_dir, dataset):
     if data_path is not None:
         df_ip = pd.read_csv(data_path, compression='gzip', sep="\t")
     else:
+        print(f"Loading {dataset} from HuggingFace hub")
         df_ip = load_dataset("imageomics/char-sim-data", dataset, split="train").to_pandas()
     df_ip['simGIC'] = df_ip['simGIC']/100.0 # normalize similarity score values (per the max SimGIC value)
     df_ip['simGIC'] = (df_ip['simGIC']*2)-1  # to match cos_similarity range
