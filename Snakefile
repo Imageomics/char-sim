@@ -108,5 +108,5 @@ rule train_model:
     conda:
         "train_environment.yaml"
     shell:
-        "mkdir {output.output_dir}; python train_model.py {input.data} {output.output_dir}"
+        "mkdir {output.output_dir}; python train_model.py --data_path {input.data} --output_dir {output.output_dir}"
 
