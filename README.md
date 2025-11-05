@@ -15,7 +15,7 @@ Trait2Vec is a Sentence Transformer model trained on a new character similarity 
 
 ## Model
 
-The Trait2Vec model is a [Sentence Transformer](https://huggingface.co/sentence-transformers/all-mpnet-base-v2) pre-trained with the [CosENT](https://sbert.net/docs/package_reference/sentence_transformer/losses.html#cosentloss) objective. The dependencies are listed in [`train_environement.yaml`](https://github.com/Imageomics/char-sim/blob/main/train_environment.yaml) package. 
+The Trait2Vec model is a [Sentence Transformer](https://huggingface.co/sentence-transformers/all-mpnet-base-v2) pre-trained with the [CosENT](https://sbert.net/docs/package_reference/sentence_transformer/losses.html#cosentloss) objective. The dependencies are listed in [`train_environement.yaml`](https://github.com/Imageomics/char-sim/blob/main/train_environment.yaml).
 
 To train a Trait2Vec model on all the dataset, please change directory to this repo and run:
 ```
