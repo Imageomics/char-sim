@@ -1,0 +1,25 @@
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX dc: <http://purl.org/dc/elements/1.1/>
+PREFIX oio: <http://www.geneontology.org/formats/oboInOwl#>
+PREFIX obo: <http://purl.obolibrary.org/obo/>
+PREFIX ps: <http://purl.org/phenoscape/vocab.owl#>
+PREFIX siluriformes: <http://purl.obolibrary.org/obo/VTO_0034991>
+SELECT DISTINCT ?character ?state ?annotation
+WHERE {
+  ?state rdf:type obo:CDAO_0000045 .
+  ?state dc:description ?desc .
+  ?state ps:describes_phenotype ?annotation .
+  ?character ps:may_have_state_value ?state .
+  ?taxon ps:exhibits_state ?state .
+  ?taxon rdfs:subClassOf* siluriformes: .
+  FILTER NOT EXISTS {
+    VALUES ?pub { <http://bdpi.usp.br/single.php?_id=001000413> <https://repositorio.usp.br/item/001044423> <https://repositorio.usp.br/item/001439323> <https://scholar.google.com/scholar?#q=Sistemática+e+Evolução+da+Fam%C3%ADlia+Pseudopimelodidae+%28Ostariophysi%2C+Siluriformes%29%2C+com+a+Revisão+Taxonômica+de+Gênero+Pseudopimelodus&btnG=&hl=en&as_sdt=0%2C42> }
+    ?pub obo:CDAO_0000142 ?character .
+    ?character ps:may_have_state_value ?state .
+  }
+  FILTER NOT EXISTS {
+    ?annotation ps:quality_term ?quality .
+    ?quality oio:inSubset <http://purl.obolibrary.org/obo/pato#attribute_slim> .
+  }
+}
