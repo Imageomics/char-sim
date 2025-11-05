@@ -49,7 +49,7 @@ TBD
 @software{Garcia_Character_Similarity_2025,
 author = {Garcia, Juan J. and Balhoff, James P. and Kar, Soumyashree and Lapp, Hilmar},
 month = nov,
-title = {{Character Similarity}},
+title = {{char-sim}},
 url = {https://github.com/Imageomics/char-sim},
 version = {1.0.0},
 year = {2025}
