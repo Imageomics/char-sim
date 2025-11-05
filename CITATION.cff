@@ -35,5 +35,5 @@ message: "If you find this software helpful in your research, please cite both t
 repository-code: "https://github.com/Imageomics/char-sim"
 title: "Character Similarity"
 version: 1.0.0
-doi: <DOI from Zenodo>    # version agnostic DOI, add once generated
+#doi: version agnostic DOI, add once generated
 type: software
