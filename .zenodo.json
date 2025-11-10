@@ -1,0 +1,40 @@
+{
+    "creators": [
+      {
+          "name": "Garcia, Juan J.",
+          "affiliation": "University of North Carolina at Chapel Hill"
+      },
+      {
+          "name": "Balhoff, James P.",
+          "affiliation": "RENCI/University of North Carolina at Chapel Hill"
+      },
+      {
+          "name": "Kar, Soumyashree",
+          "affiliation": "RENCI/University of North Carolina at Chapel Hill"
+      },
+      {
+          "name": "Lapp, Hilmar",
+          "affiliation": "Duke University"
+      }
+    ],
+    "description": "Code used for training the Trait2Vec model using the Character Similarity dataset, and for the evaluation of the model (testing and visualizing embeddings). Additionally, we include a collection of scripts for forming, evaluating, and visualizing the character similarity data created alongside it.",
+    "keywords": [
+      "imageomics",
+      "biology",
+      "organism",
+      "animals",
+      "fish",
+      "traits",
+      "ontology",
+      "phenoscape"
+    ],
+    "title": "char-sim",
+    "version": "1.0.0",
+    "license": "MIT",
+    "publication_date": "2025-11-05",
+    "grants": [
+        {
+            "id": "021nxhr62::2118240"
+        }
+    ] 
+}

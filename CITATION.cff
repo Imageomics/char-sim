@@ -1,0 +1,38 @@
+abstract: "Code used for training the Trait2Vec model using the Character Similarity dataset, and for the evaluation of the model (testing and visualizing embeddings). Additionally, we include a collection of scripts for forming, evaluating, and visualizing the character similarity data created alongside it."
+authors:
+- family-names: Garcia
+  given-names: "Juan J."
+  orcid: "https://orcid.org/0009-0003-6503-2986"
+- family-names: Balhoff
+  given-names: "James P."
+  orcid: "https://orcid.org/0000-0002-8688-6599"
+- family-names: Kar
+  given-names: "Soumyashree"
+- family-names: Lapp
+  given-names: "Hilmar"
+  orcid: "https://orcid.org/0000-0001-9107-0714"
+cff-version: 1.2.0
+date-released: "2025-11-05"
+identifiers:
+  - description: "The GitHub release URL of tag v1.0.0."
+    type: url
+    value: "https://github.com/Imageomics/char-sim/releases/tag/v1.0.0"
+  - description: "The GitHub URL of the commit tagged with v1.0.0."
+    type: url
+    value: "https://github.com/Imageomics/char-sim/tree/<commit-hash>" # update on release
+keywords:
+  - imageomics
+  - biology
+  - organism
+  - animals
+  - fish
+  - traits
+  - ontology
+  - phenoscape
+license:
+message: "If you find this software helpful in your research, please cite both the software and our paper."
+repository-code: "https://github.com/Imageomics/char-sim"
+title: "Character Similarity"
+version: 1.0.0
+#doi: version agnostic DOI, add once generated
+type: software
