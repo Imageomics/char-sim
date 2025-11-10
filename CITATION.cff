@@ -2,7 +2,7 @@ abstract: "Code used for training the Trait2Vec model using the Character Simila
 authors:
 - family-names: Garcia
   given-names: "Juan J."
-  orcid: "https://orcid.org/<ORCID #>"
+  orcid: "https://orcid.org/0009-0003-6503-2986"
 - family-names: Balhoff
   given-names: "James P."
   orcid: "https://orcid.org/0000-0002-8688-6599"
